@@ -1,0 +1,17 @@
+.score-board {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main, #f8fafc);
+  padding: 0.5rem 1rem;
+  background-color: var(--panel-bg, #1e293b);
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #334155);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.score-value {
+  color: #10b981;
+}
+

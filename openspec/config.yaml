@@ -1,0 +1,53 @@
+schema: spec-driven
+githubCopilot:
+  cloudAgent: false
+
+# Project context (included in all artifact instructions)
+context: |
+  Tech stack: TypeScript, Node.js, Express, Prisma, Domain-Driven Design (DDD)
+  Architecture: Clean Architecture with Domain, Application, and Presentation layers
+  We use conventional commits
+  Domain: LTI (Leadership. Technology. Impact) ATS platform
+  All code, comments, documentation, and technical artifacts must be in English
+
+  Project specs (single source of truth): All artifact creation and implementation MUST follow the project's technical context in ai-specs/ and docs/. Read and apply these when creating or implementing:
+  - docs/base-standards.md — core principles, TDD, language standards, links to backend/frontend/docs standards
+  - docs/backend-standards.md — API, database, testing, security (backend changes)
+  - docs/frontend-standards.md — React, UI/UX (frontend changes)
+  - docs/api-spec.yml — API contracts and endpoint definitions
+  - docs/data-model.md — domain and data model
+  - docs/documentation-standards.md — docs structure and maintenance
+  - docs/openspec-tasks-mandatory-steps.md — mandatory steps, reports, and execution rules for tasks.md
+  For implementation: adopt the relevant agent from ai-specs/agents/ (e.g. backend-developer.md for backend, frontend-developer.md for frontend). Use ai-specs/skills/ for workflow guidance when applicable.
+
+# Per-artifact rules
+rules:
+  proposal:
+    - "Before creating any artifact, read and apply docs/base-standards.md"
+    - "Ensure alignment with domain goals and architectural standards in docs/base-standards.md"
+  specs:
+    - "Before creating any artifact, read and apply docs/base-standards.md"
+    - "Reference docs/api-spec.yml and docs/data-model.md for consistent schemas, contracts, and terminology"
+  design:
+    - "Before creating any artifact, read and apply docs/base-standards.md"
+    - "For backend-related architecture, read docs/backend-standards.md and adopt guidelines from ai-specs/agents/backend-developer.md"
+    - "For frontend-related architecture, read docs/frontend-standards.md and adopt guidelines from ai-specs/agents/frontend-developer.md"
+    - "Follow Clean Architecture and DDD principles documented in docs/backend-standards.md and docs/frontend-standards.md"
+  tasks:
+    - "Before creating any artifact, read and apply docs/base-standards.md"
+    - "Follow docs/openspec-tasks-mandatory-steps.md strictly"
+    - "Step 0 MUST be Create Feature Branch (feature/[name])"
+    - "Include mandatory verification and test steps: unit test review, unit test execution and DB baseline verification, curl manual testing (AGENT MUST EXECUTE), Playwright E2E testing (if applicable), and documentation updates"
+    - "Tasks must adopt guidelines from ai-specs/agents/backend-developer.md or ai-specs/agents/frontend-developer.md depending on scope"
+
+# Per-operation guidance
+operations:
+  apply:
+    guidance:
+      - "Read and follow docs/base-standards.md and relevant agent roles in ai-specs/agents/"
+      - "Follow Test-Driven Development (TDD) strictly"
+      - "The agent MUST execute all tests autonomously (curl, unit tests, E2E) - never delegate testing to the user"
+      - "Tasks can only be marked completed after tests pass and reports are generated"
+  archive:
+    guidance:
+      - "Summarize the archive outcome and ensure all main specs are kept up to date"

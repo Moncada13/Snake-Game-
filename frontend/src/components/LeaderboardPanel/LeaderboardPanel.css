@@ -1,0 +1,52 @@
+.leaderboard-panel {
+  background-color: var(--panel-bg, #1e293b);
+  border: 1px solid var(--border-color, #334155);
+  border-radius: 8px;
+  padding: 1rem;
+  min-width: 200px;
+}
+
+.leaderboard-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main, #f8fafc);
+  margin-bottom: 0.75rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color, #334155);
+  padding-bottom: 0.5rem;
+}
+
+.leaderboard-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.leaderboard-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.leaderboard-rank {
+  font-weight: 700;
+  color: #38bdf8;
+  width: 2rem;
+}
+
+.leaderboard-player {
+  flex: 1;
+  text-align: left;
+  color: var(--text-muted, #94a3b8);
+  padding: 0 0.5rem;
+}
+
+.leaderboard-score {
+  font-weight: 600;
+  color: #10b981;
+}
+
