@@ -1,5 +1,7 @@
 import React, { useReducer } from 'react';
 import { gameStateReducer, INITIAL_GAME_STATE } from '../../game/gameStateReducer';
+import { useGameLoop } from '../../hooks/useGameLoop';
+import { useKeyboardControls } from '../../hooks/useKeyboardControls';
 import { GameBoard } from '../GameBoard/GameBoard';
 import { ControlPanel } from '../ControlPanel/ControlPanel';
 import { ScoreBoard } from '../ScoreBoard/ScoreBoard';
@@ -8,6 +10,19 @@ import './SnakeGame.css';
 
 export const SnakeGame: React.FC = () => {
   const [state, dispatch] = useReducer(gameStateReducer, INITIAL_GAME_STATE);
+
+  const isRunning = state.status === 'RUNNING';
+
+  useGameLoop({
+    isRunning,
+    onTick: () => dispatch({ type: 'TICK' }),
+  });
+
+  useKeyboardControls({
+    isRunning,
+    onDirectionChange: (direction) =>
+      dispatch({ type: 'CHANGE_DIRECTION', payload: direction }),
+  });
 
   const handleStart = () => {
     dispatch({ type: 'START' });
@@ -33,7 +48,11 @@ export const SnakeGame: React.FC = () => {
 
       <section className="snake-game-content">
         <div className="snake-game-arena">
-          <GameBoard status={state.status} score={state.score} />
+          <GameBoard
+            status={state.status}
+            score={state.score}
+            snake={state.snake}
+          />
         </div>
         <div className="snake-game-sidebar">
           <LeaderboardPanel />

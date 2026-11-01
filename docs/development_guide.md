@@ -77,6 +77,27 @@ docker-compose ps
 
 ---
 
+## 🐍 Game Engine & Controls Architecture (US-02)
+
+The game physics, tick loop, and keyboard steering are implemented using modular pure functions and custom React hooks:
+
+### 1. Pure Geometry Engine (`frontend/src/game/snakeEngine.ts`)
+- `isOppositeDirection(dirA, dirB)`: Determines 180° opposite direction pairs (`UP` $\leftrightarrow$ `DOWN`, `LEFT` $\leftrightarrow$ `RIGHT`).
+- `getNextHeadPosition(head, direction)`: Computes next cell coordinate along the 30px grid.
+- `advanceSnake(snake, direction)`: Advances snake by prepending new head and dropping tail.
+
+### 2. Custom Hooks
+- **`useGameLoop` (`frontend/src/hooks/useGameLoop.ts`)**: Manages `setInterval` lifecycle at `TICK_INTERVAL_MS = 150` ms while `status === 'RUNNING'`, guaranteeing clean teardown on unmount or reset.
+- **`useKeyboardControls` (`frontend/src/hooks/useKeyboardControls.ts`)**: Window-level event listener for arrow keys (`ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`). Executes `event.preventDefault()` to prevent viewport scrolling.
+
+### 3. Anti-Glitch 180° Turnaround Protection
+To avoid the classic double-key rapid turn crash (e.g., turning `UP` then `LEFT` while moving `RIGHT` within a single 150ms tick), the state tracks:
+- `direction`: The direction committed on the most recent tick.
+- `nextDirection`: The queued direction requested by the player.
+Candidate keypresses are validated against `direction` rather than `nextDirection`.
+
+---
+
 ## 🧪 Testing Verification Checklist
 
 Before archiving any OpenSpec change:

@@ -7,6 +7,7 @@ import {
   BOARD_WIDTH,
   CELL_SIZE,
   GRID_LINE_COLOR,
+  SNAKE_COLOR,
 } from './constants';
 import { Position } from './types';
 
@@ -59,5 +60,19 @@ export function drawCell(
 
   ctx.fillStyle = color;
   ctx.fillRect(position.x, position.y, CELL_SIZE, CELL_SIZE);
+}
+
+/**
+ * Draws all segments of the snake using the SNAKE_COLOR (#22c55e).
+ */
+export function drawSnake(
+  ctx: CanvasRenderingContext2D,
+  snake: Position[]
+): void {
+  if (!ctx || !snake || snake.length === 0) return;
+
+  for (let i = 0; i < snake.length; i++) {
+    drawCell(ctx, snake[i], SNAKE_COLOR);
+  }
 }
 

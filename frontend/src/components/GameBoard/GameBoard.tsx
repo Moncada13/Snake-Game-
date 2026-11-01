@@ -1,15 +1,20 @@
 import React, { useEffect, useRef } from 'react';
-import { GameStatus } from '../../game/types';
+import { GameStatus, Position } from '../../game/types';
 import { BOARD_WIDTH, BOARD_HEIGHT } from '../../game/constants';
-import { drawBoard } from '../../game/boardRenderer';
+import { drawBoard, drawSnake } from '../../game/boardRenderer';
 import './GameBoard.css';
 
 interface GameBoardProps {
   status: GameStatus;
   score: number;
+  snake?: Position[];
 }
 
-export const GameBoard: React.FC<GameBoardProps> = ({ status, score }) => {
+export const GameBoard: React.FC<GameBoardProps> = ({
+  status,
+  score,
+  snake = [],
+}) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -24,7 +29,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ status, score }) => {
     ctx.scale(dpr, dpr);
 
     drawBoard(ctx);
-  }, [status]);
+    drawSnake(ctx, snake);
+  }, [status, snake]);
 
   return (
     <div

@@ -7,8 +7,9 @@ import {
   BOARD_WIDTH,
   CELL_SIZE,
   GRID_LINE_COLOR,
+  SNAKE_COLOR,
 } from './constants';
-import { drawBoard, drawCell } from './boardRenderer';
+import { drawBoard, drawCell, drawSnake } from './boardRenderer';
 import { Position } from './types';
 
 describe('boardRenderer', () => {
@@ -86,6 +87,28 @@ describe('boardRenderer', () => {
       expect(() =>
         drawCell(null as unknown as CanvasRenderingContext2D, { x: 0, y: 0 }, '#fff')
       ).not.toThrow();
+    });
+  });
+
+  describe('drawSnake', () => {
+    it('draws each segment of the snake with SNAKE_COLOR', () => {
+      const snake: Position[] = [
+        { x: 60, y: 60 },
+        { x: 30, y: 60 },
+      ];
+
+      drawSnake(mockCtx as CanvasRenderingContext2D, snake);
+
+      expect(mockCtx.fillStyle).toBe(SNAKE_COLOR);
+      expect(fillRectSpy).toHaveBeenCalledTimes(2);
+      expect(fillRectSpy).toHaveBeenNthCalledWith(1, 60, 60, CELL_SIZE, CELL_SIZE);
+      expect(fillRectSpy).toHaveBeenNthCalledWith(2, 30, 60, CELL_SIZE, CELL_SIZE);
+    });
+
+    it('safely handles null context or empty snake array', () => {
+      expect(() => drawSnake(null as unknown as CanvasRenderingContext2D, [])).not.toThrow();
+      expect(() => drawSnake(mockCtx as CanvasRenderingContext2D, [])).not.toThrow();
+      expect(fillRectSpy).not.toHaveBeenCalled();
     });
   });
 });
