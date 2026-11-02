@@ -108,8 +108,23 @@ Candidate keypresses are validated against `direction` rather than `nextDirectio
 ### 2. Consumption, Tail-Retention Growth & Scoring
 - `isEatingApple(head, apple)` (`frontend/src/game/snakeEngine.ts`): Checks whether the next head coordinate coincides with the active apple coordinate.
 - `advanceSnake(snake, direction, grow)`: When `grow === true`, prepends the new head position while retaining all existing segments (`+1` segment / `+30px` length). When `grow === false`, drops the last tail segment to preserve length.
-- `POINTS_PER_APPLE = 100` (`frontend/src/game/constants.ts`): Each apple consumed increments `score` by `100` points and immediately spawns a new apple on a free cell (or transitions `status` to `'GAME_OVER'` if the snake reaches 25 segments and fills the entire board).
+- `POINTS_PER_APPLE = 100` (`frontend/src/game/constants.ts`): Each apple consumed increments `score` by `100` points and immediately spawns a new apple on a free cell (or transitions `status` to `'GAME_OVER'` with `gameOverReason: 'BOARD_FULL'` if the snake reaches 25 segments and fills the entire board).
 - `drawApple(ctx, apple)` (`frontend/src/game/boardRenderer.ts`): Renders the apple on the Canvas at `(apple.x, apple.y)` with dimensions `30px × 30px` in red (`#ef4444`).
+
+---
+
+## 💥 Collision Detection & Game Over Architecture (US-04)
+
+### 1. Pure Collision Detector (`frontend/src/game/collisionDetector.ts`)
+- `checkWallCollision(nextHead, boardWidth, boardHeight)`: Returns `true` when the candidate head coordinate falls outside the valid arena bounds (`nextHead.x < 0 || nextHead.x >= boardWidth || nextHead.y < 0 || nextHead.y >= boardHeight`, i.e., outside `0..120` on the `150px × 150px` board).
+- `checkSelfCollision(nextHead, activeBodySegments)`: Returns `true` when `nextHead` matches any segment in `activeBodySegments`.
+
+### 2. Tail-Vacating Rule & Tick Evaluation Order
+- On each `TICK` in `gameStateReducer.ts`:
+  1. `nextHead` is computed from `state.snake[0]` and `state.nextDirection`.
+  2. **Wall Collision Check**: Evaluated *before* advancing `state.snake`. If `true`, transitions to `status: 'GAME_OVER'`, sets `gameOverReason: 'WALL'`, and freezes `state.snake` and `state.score` in bounds.
+  3. **Self-Collision Check (Tail-Vacating Rule)**: Determines `ateApple = isEatingApple(nextHead, state.apple)` and checks `nextHead` against `ateApple ? state.snake : state.snake.slice(0, -1)`. Because the tail vacates its cell on a non-eating tick, moving into the vacating tail cell is allowed and does not trigger a false collision. If self-collision occurs, transitions to `status: 'GAME_OVER'` with `gameOverReason: 'SELF'`.
+  4. **Game Over Overlay & Reset Recovery**: `GameBoard` displays `data-testid="game-over-overlay"` with `data-reason={gameOverReason}` and the locked final score; clicking `Reset` restores `status: 'IDLE'`, `score: 0`, and `gameOverReason: null`.
 
 ---
 

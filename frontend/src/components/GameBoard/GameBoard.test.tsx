@@ -78,13 +78,19 @@ describe('GameBoard Component', () => {
     expect(screen.queryByTestId('game-over-overlay')).not.toBeInTheDocument();
   });
 
-  it('displays the Game Over overlay with final score when status is GAME_OVER', () => {
-    render(<GameBoard status="GAME_OVER" score={400} />);
+  it('displays the Game Over overlay with final score and reason when status is GAME_OVER', () => {
+    const { rerender } = render(
+      <GameBoard status="GAME_OVER" score={400} gameOverReason="WALL" />
+    );
 
     const overlay = screen.getByTestId('game-over-overlay');
     expect(overlay).toBeInTheDocument();
+    expect(overlay).toHaveAttribute('data-reason', 'WALL');
     expect(overlay).toHaveTextContent(/game over/i);
     expect(overlay).toHaveTextContent(/final score:\s*400/i);
     expect(overlay).toHaveTextContent(/press reset to play again/i);
+
+    rerender(<GameBoard status="GAME_OVER" score={400} />);
+    expect(screen.getByTestId('game-over-overlay')).not.toHaveAttribute('data-reason');
   });
 });

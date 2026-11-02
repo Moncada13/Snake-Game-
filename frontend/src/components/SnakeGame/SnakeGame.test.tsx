@@ -109,4 +109,32 @@ describe('SnakeGame Root Component Integration', () => {
       { x: 60, y: 60 },
     ]);
   });
+
+  it('detects wall collision, displays Game Over overlay, and recovers on Reset', () => {
+    render(<SnakeGame />);
+
+    const startBtn = screen.getByTestId('start-button');
+    const resetBtn = screen.getByTestId('reset-button');
+
+    fireEvent.click(startBtn);
+
+    // Steer UP from {30, 60}:
+    // Tick 1 -> {30, 30}
+    // Tick 2 -> {30, 0}
+    // Tick 3 -> {30, -30} (top wall collision!)
+    fireEvent.keyDown(window, { key: 'ArrowUp', cancelable: true });
+
+    act(() => {
+      jest.advanceTimersByTime(450);
+    });
+
+    const overlay = screen.getByTestId('game-over-overlay');
+    expect(overlay).toBeInTheDocument();
+    expect(overlay).toHaveAttribute('data-reason', 'WALL');
+
+    // Click Reset -> overlay disappears and Start button is re-enabled
+    fireEvent.click(resetBtn);
+    expect(screen.queryByTestId('game-over-overlay')).not.toBeInTheDocument();
+    expect(startBtn).toBeEnabled();
+  });
 });

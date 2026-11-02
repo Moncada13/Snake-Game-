@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { GameStatus, Position } from '../../game/types';
+import { GameOverReason, GameStatus, Position } from '../../game/types';
 import { BOARD_WIDTH, BOARD_HEIGHT } from '../../game/constants';
 import { drawApple, drawBoard, drawSnake } from '../../game/boardRenderer';
 import './GameBoard.css';
@@ -9,6 +9,7 @@ interface GameBoardProps {
   score: number;
   snake?: Position[];
   apple?: Position | null;
+  gameOverReason?: GameOverReason;
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({
@@ -16,6 +17,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   score,
   snake = [],
   apple = null,
+  gameOverReason = null,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -49,7 +51,11 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       />
 
       {status === 'GAME_OVER' && (
-        <div className="game-over-overlay" data-testid="game-over-overlay">
+        <div
+          className="game-over-overlay"
+          data-testid="game-over-overlay"
+          data-reason={gameOverReason ?? undefined}
+        >
           <p className="game-over-title">Game Over</p>
           <p className="game-over-score">Final Score: {score}</p>
           <p className="game-over-hint">Press Reset to play again</p>

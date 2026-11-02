@@ -138,5 +138,49 @@ describe('E2E Application Workflow', () => {
     drawSnakeSpy.mockRestore();
     drawAppleSpy.mockRestore();
   });
-});
 
+  it('executes wall collision & Game Over E2E cycle: Start -> Eat apple (+100) -> Hit right wall -> Game Over overlay locks score -> Reset recovers', () => {
+    jest.useFakeTimers();
+    const drawSnakeSpy = jest.spyOn(boardRenderer, 'drawSnake');
+
+    render(<App />);
+
+    const startBtn = screen.getByTestId('start-button');
+    const resetBtn = screen.getByTestId('reset-button');
+    const scoreVal = screen.getByTestId('score-value');
+
+    // 1. Start game at {30, 60} moving RIGHT, apple at {90, 60}
+    fireEvent.click(startBtn);
+
+    // 2. Advance 4 ticks (600ms):
+    // Tick 1: {60, 60}
+    // Tick 2: {90, 60} (eats apple, score = 100, length = 2)
+    // Tick 3: {120, 60} (unless respawned apple was at {120, 60}, in which case score = 200)
+    // Tick 4: {150, 60} -> Right wall collision!
+    act(() => {
+      jest.advanceTimersByTime(600);
+    });
+
+    // 3. Verify Game Over overlay is visible and reason is WALL
+    const overlay = screen.getByTestId('game-over-overlay');
+    expect(overlay).toBeInTheDocument();
+    expect(overlay).toHaveAttribute('data-reason', 'WALL');
+    const lockedScore = scoreVal.textContent;
+    expect(Number(lockedScore)).toBeGreaterThanOrEqual(100);
+    expect(overlay).toHaveTextContent(`Final Score: ${lockedScore}`);
+
+    // 4. Verify snake remained frozen in bounds (head at x = 120)
+    const lastSnakeRendered = drawSnakeSpy.mock.calls[drawSnakeSpy.mock.calls.length - 1][1];
+    expect(lastSnakeRendered[0]).toEqual({ x: 120, y: 60 });
+
+    // 5. Click Reset -> overlay disappears, score resets to 0, Start button re-enabled
+    fireEvent.click(resetBtn);
+    expect(screen.queryByTestId('game-over-overlay')).not.toBeInTheDocument();
+    expect(scoreVal).toHaveTextContent('0');
+    expect(startBtn).toBeEnabled();
+
+    jest.clearAllTimers();
+    jest.useRealTimers();
+    drawSnakeSpy.mockRestore();
+  });
+});

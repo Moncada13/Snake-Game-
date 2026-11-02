@@ -15,6 +15,7 @@ describe('gameStateReducer', () => {
       direction: 'RIGHT',
       nextDirection: 'RIGHT',
       apple: INITIAL_APPLE_POSITION,
+      gameOverReason: null,
     });
   });
 
@@ -26,6 +27,7 @@ describe('gameStateReducer', () => {
       expect(nextState.status).toBe('RUNNING');
       expect(nextState.snake).toEqual([{ x: 30, y: 60 }]);
       expect(nextState.apple).toEqual(INITIAL_APPLE_POSITION);
+      expect(nextState.gameOverReason).toBeNull();
     });
 
     it('spawns a new apple on START if state.apple is null', () => {
@@ -47,7 +49,12 @@ describe('gameStateReducer', () => {
     });
 
     it('does not allow START directly from GAME_OVER (must RESET first)', () => {
-      const state: GameState = { ...INITIAL_GAME_STATE, status: 'GAME_OVER', score: 300 };
+      const state: GameState = {
+        ...INITIAL_GAME_STATE,
+        status: 'GAME_OVER',
+        score: 300,
+        gameOverReason: 'WALL',
+      };
       const action: GameAction = { type: 'START' };
       const nextState = gameStateReducer(state, action);
       expect(nextState).toEqual(state);
@@ -55,7 +62,7 @@ describe('gameStateReducer', () => {
   });
 
   describe('RESET action', () => {
-    it('resets score, snake position, direction, status to IDLE, and spawns a fresh unoccupied apple', () => {
+    it('resets score, snake position, direction, status to IDLE, gameOverReason to null, and spawns a fresh unoccupied apple', () => {
       const state: GameState = {
         status: 'RUNNING',
         score: 500,
@@ -63,15 +70,17 @@ describe('gameStateReducer', () => {
         direction: 'DOWN',
         nextDirection: 'DOWN',
         apple: { x: 0, y: 0 },
+        gameOverReason: null,
       };
       const nextState = gameStateReducer(state, { type: 'RESET' }, () => 0);
       expect(nextState).toEqual({
         ...INITIAL_GAME_STATE,
         apple: { x: 0, y: 0 },
+        gameOverReason: null,
       });
     });
 
-    it('resets state when in GAME_OVER', () => {
+    it('resets state and clears gameOverReason when in GAME_OVER', () => {
       const state: GameState = {
         status: 'GAME_OVER',
         score: 500,
@@ -79,12 +88,14 @@ describe('gameStateReducer', () => {
         direction: 'DOWN',
         nextDirection: 'DOWN',
         apple: null,
+        gameOverReason: 'WALL',
       };
       const nextState = gameStateReducer(state, { type: 'RESET' }, () => 0);
       expect(nextState.status).toBe('IDLE');
       expect(nextState.score).toBe(0);
       expect(nextState.snake).toEqual([{ x: 30, y: 60 }]);
       expect(nextState.apple).toEqual({ x: 0, y: 0 });
+      expect(nextState.gameOverReason).toBeNull();
     });
   });
 
@@ -97,6 +108,7 @@ describe('gameStateReducer', () => {
         direction: 'RIGHT',
         nextDirection: 'RIGHT',
         apple: { x: 0, y: 0 },
+        gameOverReason: null,
       };
       const action: GameAction = { type: 'GAME_OVER' };
       const nextState = gameStateReducer(state, action);
@@ -125,7 +137,11 @@ describe('gameStateReducer', () => {
       const idleState: GameState = { ...INITIAL_GAME_STATE, status: 'IDLE' };
       expect(gameStateReducer(idleState, { type: 'TICK' })).toBe(idleState);
 
-      const gameOverState: GameState = { ...INITIAL_GAME_STATE, status: 'GAME_OVER' };
+      const gameOverState: GameState = {
+        ...INITIAL_GAME_STATE,
+        status: 'GAME_OVER',
+        gameOverReason: 'WALL',
+      };
       expect(gameStateReducer(gameOverState, { type: 'TICK' })).toBe(gameOverState);
     });
 
@@ -137,6 +153,7 @@ describe('gameStateReducer', () => {
         direction: 'RIGHT',
         nextDirection: 'DOWN',
         apple: { x: 120, y: 120 },
+        gameOverReason: null,
       };
       const nextState = gameStateReducer(state, { type: 'TICK' });
 
@@ -145,6 +162,7 @@ describe('gameStateReducer', () => {
       expect(nextState.snake).toEqual([{ x: 30, y: 90 }]);
       expect(nextState.score).toBe(100);
       expect(nextState.apple).toEqual({ x: 120, y: 120 });
+      expect(nextState.gameOverReason).toBeNull();
     });
 
     it('increments score by 100, grows snake by 1 segment, and spawns a new apple when eating', () => {
@@ -155,6 +173,7 @@ describe('gameStateReducer', () => {
         direction: 'RIGHT',
         nextDirection: 'RIGHT',
         apple: { x: 60, y: 60 },
+        gameOverReason: null,
       };
 
       const nextState = gameStateReducer(state, { type: 'TICK' }, () => 0);
@@ -167,6 +186,7 @@ describe('gameStateReducer', () => {
       expect(nextState.snake).toHaveLength(2);
       expect(nextState.apple).toEqual({ x: 0, y: 0 });
       expect(nextState.status).toBe('RUNNING');
+      expect(nextState.gameOverReason).toBeNull();
 
       // Subsequent non-eating tick preserves the new length of 2
       const followingTick = gameStateReducer(nextState, { type: 'TICK' });
@@ -177,7 +197,7 @@ describe('gameStateReducer', () => {
       expect(followingTick.snake).toHaveLength(2);
     });
 
-    it('transitions to GAME_OVER with apple = null when eating the 25th and final available cell', () => {
+    it('transitions to GAME_OVER with gameOverReason = BOARD_FULL and apple = null when eating the 25th and final available cell', () => {
       // Fill 24 of the 25 cells, leaving only {0, 0} for the apple
       const almostFullSnake: Position[] = [];
       for (let row = 0; row < BOARD_ROWS; row++) {
@@ -200,6 +220,7 @@ describe('gameStateReducer', () => {
         direction: 'LEFT',
         nextDirection: 'LEFT',
         apple: { x: 0, y: 0 },
+        gameOverReason: null,
       };
 
       const nextState = gameStateReducer(state, { type: 'TICK' });
@@ -208,6 +229,167 @@ describe('gameStateReducer', () => {
       expect(nextState.snake).toHaveLength(25);
       expect(nextState.apple).toBeNull();
       expect(nextState.status).toBe('GAME_OVER');
+      expect(nextState.gameOverReason).toBe('BOARD_FULL');
+    });
+
+    describe('Wall Collisions (US-04)', () => {
+      it('detects right wall collision (x >= 150), sets GAME_OVER with gameOverReason = WALL, and freezes snake in bounds', () => {
+        const state: GameState = {
+          status: 'RUNNING',
+          score: 300,
+          snake: [{ x: 120, y: 60 }],
+          direction: 'RIGHT',
+          nextDirection: 'RIGHT',
+          apple: { x: 0, y: 0 },
+          gameOverReason: null,
+        };
+
+        const nextState = gameStateReducer(state, { type: 'TICK' });
+
+        expect(nextState.status).toBe('GAME_OVER');
+        expect(nextState.gameOverReason).toBe('WALL');
+        expect(nextState.snake).toEqual([{ x: 120, y: 60 }]);
+        expect(nextState.score).toBe(300);
+      });
+
+      it('detects left wall collision (x < 0), sets GAME_OVER with gameOverReason = WALL, and freezes snake in bounds', () => {
+        const state: GameState = {
+          status: 'RUNNING',
+          score: 100,
+          snake: [{ x: 0, y: 60 }],
+          direction: 'UP',
+          nextDirection: 'LEFT',
+          apple: { x: 90, y: 90 },
+          gameOverReason: null,
+        };
+
+        const nextState = gameStateReducer(state, { type: 'TICK' });
+
+        expect(nextState.status).toBe('GAME_OVER');
+        expect(nextState.gameOverReason).toBe('WALL');
+        expect(nextState.direction).toBe('LEFT');
+        expect(nextState.snake).toEqual([{ x: 0, y: 60 }]);
+      });
+
+      it('detects top wall collision (y < 0), sets GAME_OVER with gameOverReason = WALL, and freezes snake in bounds', () => {
+        const state: GameState = {
+          status: 'RUNNING',
+          score: 100,
+          snake: [{ x: 60, y: 0 }],
+          direction: 'RIGHT',
+          nextDirection: 'UP',
+          apple: { x: 90, y: 90 },
+          gameOverReason: null,
+        };
+
+        const nextState = gameStateReducer(state, { type: 'TICK' });
+
+        expect(nextState.status).toBe('GAME_OVER');
+        expect(nextState.gameOverReason).toBe('WALL');
+        expect(nextState.direction).toBe('UP');
+        expect(nextState.snake).toEqual([{ x: 60, y: 0 }]);
+      });
+
+      it('detects bottom wall collision (y >= 150), sets GAME_OVER with gameOverReason = WALL, and freezes snake in bounds', () => {
+        const state: GameState = {
+          status: 'RUNNING',
+          score: 100,
+          snake: [{ x: 60, y: 120 }],
+          direction: 'RIGHT',
+          nextDirection: 'DOWN',
+          apple: { x: 90, y: 0 },
+          gameOverReason: null,
+        };
+
+        const nextState = gameStateReducer(state, { type: 'TICK' });
+
+        expect(nextState.status).toBe('GAME_OVER');
+        expect(nextState.gameOverReason).toBe('WALL');
+        expect(nextState.direction).toBe('DOWN');
+        expect(nextState.snake).toEqual([{ x: 60, y: 120 }]);
+      });
+    });
+
+    describe('Self-Collision & Tail-Vacating Rule (US-04)', () => {
+      it('detects self-collision with body segment, sets GAME_OVER with gameOverReason = SELF, and freezes snake/score', () => {
+        const snake5: Position[] = [
+          { x: 60, y: 60 },
+          { x: 90, y: 60 },
+          { x: 90, y: 30 },
+          { x: 60, y: 30 },
+          { x: 30, y: 30 },
+        ];
+        const state: GameState = {
+          status: 'RUNNING',
+          score: 400,
+          snake: snake5,
+          direction: 'LEFT',
+          nextDirection: 'UP', // Moves from {60, 60} into {60, 30}
+          apple: { x: 0, y: 120 },
+          gameOverReason: null,
+        };
+
+        const nextState = gameStateReducer(state, { type: 'TICK' });
+
+        expect(nextState.status).toBe('GAME_OVER');
+        expect(nextState.gameOverReason).toBe('SELF');
+        expect(nextState.snake).toEqual(snake5);
+        expect(nextState.score).toBe(400);
+        expect(nextState.direction).toBe('UP');
+      });
+
+      it('allows moving into the vacating tail cell on a non-eating tick without triggering self-collision', () => {
+        // 4-segment snake in a 2x2 loop chasing its tail at {30, 60}
+        const snake4: Position[] = [
+          { x: 30, y: 30 },
+          { x: 60, y: 30 },
+          { x: 60, y: 60 },
+          { x: 30, y: 60 },
+        ];
+        const state: GameState = {
+          status: 'RUNNING',
+          score: 300,
+          snake: snake4,
+          direction: 'LEFT',
+          nextDirection: 'DOWN', // Moves from {30, 30} into vacating tail {30, 60}
+          apple: { x: 120, y: 120 },
+          gameOverReason: null,
+        };
+
+        const nextState = gameStateReducer(state, { type: 'TICK' });
+
+        expect(nextState.status).toBe('RUNNING');
+        expect(nextState.gameOverReason).toBeNull();
+        expect(nextState.snake).toEqual([
+          { x: 30, y: 60 },
+          { x: 30, y: 30 },
+          { x: 60, y: 30 },
+          { x: 60, y: 60 },
+        ]);
+      });
+
+      it('checks full snake body when ateApple is true (defensive branch coverage)', () => {
+        // Synthetic state where an apple is on the tail cell to exercise the ateApple ? state.snake branch
+        const snake4: Position[] = [
+          { x: 30, y: 30 },
+          { x: 60, y: 30 },
+          { x: 60, y: 60 },
+          { x: 30, y: 60 },
+        ];
+        const state: GameState = {
+          status: 'RUNNING',
+          score: 300,
+          snake: snake4,
+          direction: 'LEFT',
+          nextDirection: 'DOWN',
+          apple: { x: 30, y: 60 },
+          gameOverReason: null,
+        };
+
+        const nextState = gameStateReducer(state, { type: 'TICK' });
+        expect(nextState.status).toBe('GAME_OVER');
+        expect(nextState.gameOverReason).toBe('SELF');
+      });
     });
   });
 
