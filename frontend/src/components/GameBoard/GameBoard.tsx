@@ -47,6 +47,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
         role="img"
         aria-label={`Snake game board, ${BOARD_WIDTH} by ${BOARD_HEIGHT} pixels`}
         data-testid="game-board-canvas"
+        width={BOARD_WIDTH}
+        height={BOARD_HEIGHT}
         style={{ width: `${BOARD_WIDTH}px`, height: `${BOARD_HEIGHT}px` }}
       />
 

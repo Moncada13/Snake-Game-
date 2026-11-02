@@ -1,9 +1,9 @@
 export const CELL_SIZE = 30;
-export const BOARD_COLUMNS = 5;
-export const BOARD_ROWS = 5;
+export const BOARD_COLUMNS = 10;
+export const BOARD_ROWS = 10;
 
-export const BOARD_WIDTH = BOARD_COLUMNS * CELL_SIZE; // 150px
-export const BOARD_HEIGHT = BOARD_ROWS * CELL_SIZE;  // 150px
+export const BOARD_WIDTH = BOARD_COLUMNS * CELL_SIZE; // 300px
+export const BOARD_HEIGHT = BOARD_ROWS * CELL_SIZE;  // 300px
 
 export const SNAKE_COLOR = '#22c55e';
 export const APPLE_COLOR = '#ef4444';

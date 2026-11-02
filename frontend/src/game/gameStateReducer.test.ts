@@ -1,4 +1,4 @@
-import { BOARD_COLUMNS, BOARD_ROWS, CELL_SIZE } from './constants';
+import { BOARD_COLUMNS, BOARD_ROWS, CELL_SIZE, POINTS_PER_APPLE } from './constants';
 import {
   gameStateReducer,
   INITIAL_APPLE_POSITION,
@@ -197,8 +197,9 @@ describe('gameStateReducer', () => {
       expect(followingTick.snake).toHaveLength(2);
     });
 
-    it('transitions to GAME_OVER with gameOverReason = BOARD_FULL and apple = null when eating the 25th and final available cell', () => {
-      // Fill 24 of the 25 cells, leaving only {0, 0} for the apple
+    it('transitions to GAME_OVER with gameOverReason = BOARD_FULL and apple = null when eating the final available cell', () => {
+      // Fill (BOARD_COLUMNS * BOARD_ROWS - 1) cells, leaving only {0, 0} for the apple
+      const totalCells = BOARD_COLUMNS * BOARD_ROWS;
       const almostFullSnake: Position[] = [];
       for (let row = 0; row < BOARD_ROWS; row++) {
         for (let col = 0; col < BOARD_COLUMNS; col++) {
@@ -210,13 +211,13 @@ describe('gameStateReducer', () => {
         }
       }
       // Put head at {30, 0} moving LEFT into {0, 0}
-      const snake24: Position[] = [{ x: 30, y: 0 }, ...almostFullSnake];
-      expect(snake24).toHaveLength(24);
+      const snakeMinusOne: Position[] = [{ x: 30, y: 0 }, ...almostFullSnake];
+      expect(snakeMinusOne).toHaveLength(totalCells - 1);
 
       const state: GameState = {
         status: 'RUNNING',
-        score: 2300,
-        snake: snake24,
+        score: (totalCells - 2) * POINTS_PER_APPLE,
+        snake: snakeMinusOne,
         direction: 'LEFT',
         nextDirection: 'LEFT',
         apple: { x: 0, y: 0 },
@@ -225,19 +226,19 @@ describe('gameStateReducer', () => {
 
       const nextState = gameStateReducer(state, { type: 'TICK' });
 
-      expect(nextState.score).toBe(2400);
-      expect(nextState.snake).toHaveLength(25);
+      expect(nextState.score).toBe((totalCells - 1) * POINTS_PER_APPLE);
+      expect(nextState.snake).toHaveLength(totalCells);
       expect(nextState.apple).toBeNull();
       expect(nextState.status).toBe('GAME_OVER');
       expect(nextState.gameOverReason).toBe('BOARD_FULL');
     });
 
     describe('Wall Collisions (US-04)', () => {
-      it('detects right wall collision (x >= 150), sets GAME_OVER with gameOverReason = WALL, and freezes snake in bounds', () => {
+      it('detects right wall collision (x >= BOARD_WIDTH), sets GAME_OVER with gameOverReason = WALL, and freezes snake in bounds', () => {
         const state: GameState = {
           status: 'RUNNING',
           score: 300,
-          snake: [{ x: 120, y: 60 }],
+          snake: [{ x: 270, y: 60 }],
           direction: 'RIGHT',
           nextDirection: 'RIGHT',
           apple: { x: 0, y: 0 },
@@ -248,7 +249,7 @@ describe('gameStateReducer', () => {
 
         expect(nextState.status).toBe('GAME_OVER');
         expect(nextState.gameOverReason).toBe('WALL');
-        expect(nextState.snake).toEqual([{ x: 120, y: 60 }]);
+        expect(nextState.snake).toEqual([{ x: 270, y: 60 }]);
         expect(nextState.score).toBe(300);
       });
 
@@ -290,11 +291,11 @@ describe('gameStateReducer', () => {
         expect(nextState.snake).toEqual([{ x: 60, y: 0 }]);
       });
 
-      it('detects bottom wall collision (y >= 150), sets GAME_OVER with gameOverReason = WALL, and freezes snake in bounds', () => {
+      it('detects bottom wall collision (y >= BOARD_HEIGHT), sets GAME_OVER with gameOverReason = WALL, and freezes snake in bounds', () => {
         const state: GameState = {
           status: 'RUNNING',
           score: 100,
-          snake: [{ x: 60, y: 120 }],
+          snake: [{ x: 60, y: 270 }],
           direction: 'RIGHT',
           nextDirection: 'DOWN',
           apple: { x: 90, y: 0 },
@@ -306,7 +307,7 @@ describe('gameStateReducer', () => {
         expect(nextState.status).toBe('GAME_OVER');
         expect(nextState.gameOverReason).toBe('WALL');
         expect(nextState.direction).toBe('DOWN');
-        expect(nextState.snake).toEqual([{ x: 60, y: 120 }]);
+        expect(nextState.snake).toEqual([{ x: 60, y: 270 }]);
       });
     });
 

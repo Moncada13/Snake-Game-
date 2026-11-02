@@ -18,10 +18,10 @@ import {
 describe('Game Constants', () => {
   it('defines correct grid and cell dimensions', () => {
     expect(CELL_SIZE).toBe(30);
-    expect(BOARD_COLUMNS).toBe(5);
-    expect(BOARD_ROWS).toBe(5);
-    expect(BOARD_WIDTH).toBe(150);
-    expect(BOARD_HEIGHT).toBe(150);
+    expect(BOARD_COLUMNS).toBe(10);
+    expect(BOARD_ROWS).toBe(10);
+    expect(BOARD_WIDTH).toBe(300);
+    expect(BOARD_HEIGHT).toBe(300);
   });
 
   it('defines visual color palette', () => {

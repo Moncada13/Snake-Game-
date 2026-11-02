@@ -4,11 +4,11 @@ import { Position } from './types';
 
 describe('appleSpawner', () => {
   describe('getAvailableCells', () => {
-    it('returns all 25 grid cells when snake is empty', () => {
+    it('returns all 100 grid cells when snake is empty', () => {
       const available = getAvailableCells([]);
       expect(available).toHaveLength(BOARD_COLUMNS * BOARD_ROWS);
       expect(available[0]).toEqual({ x: 0, y: 0 });
-      expect(available[24]).toEqual({ x: 120, y: 120 });
+      expect(available[99]).toEqual({ x: 270, y: 270 });
     });
 
     it('excludes cells occupied by the snake', () => {
@@ -18,12 +18,12 @@ describe('appleSpawner', () => {
       ];
       const available = getAvailableCells(snake);
 
-      expect(available).toHaveLength(23);
+      expect(available).toHaveLength(98);
       expect(available).not.toContainEqual({ x: 30, y: 60 });
       expect(available).not.toContainEqual({ x: 60, y: 60 });
     });
 
-    it('returns an empty array when all 25 cells are occupied by the snake', () => {
+    it('returns an empty array when all 100 cells are occupied by the snake', () => {
       const fullSnake: Position[] = [];
       for (let row = 0; row < BOARD_ROWS; row++) {
         for (let col = 0; col < BOARD_COLUMNS; col++) {
@@ -46,17 +46,17 @@ describe('appleSpawner', () => {
     });
 
     it('spawns an apple at the last available cell when rng returns 0.999', () => {
-      const snake: Position[] = [{ x: 120, y: 120 }];
+      const snake: Position[] = [{ x: 270, y: 270 }];
       const apple = spawnApple(snake, () => 0.999);
 
-      // Since {120,120} is occupied, the last available cell is {90,120}
-      expect(apple).toEqual({ x: 90, y: 120 });
+      // Since {270,270} is occupied, the last available cell is {240,270}
+      expect(apple).toEqual({ x: 240, y: 270 });
     });
 
     it('clamps out-of-bounds rng values (< 0 or >= 1) to valid cell indices', () => {
       const snake: Position[] = [{ x: 0, y: 0 }];
       expect(spawnApple(snake, () => -0.5)).toEqual({ x: 30, y: 0 });
-      expect(spawnApple(snake, () => 1.0)).toEqual({ x: 120, y: 120 });
+      expect(spawnApple(snake, () => 1.0)).toEqual({ x: 270, y: 270 });
     });
 
     it('uses default Math.random when rng is not provided and never overlaps the snake', () => {
@@ -73,7 +73,7 @@ describe('appleSpawner', () => {
       expect(apple!.y % CELL_SIZE).toBe(0);
     });
 
-    it('returns null when all 25 grid cells are occupied', () => {
+    it('returns null when all 100 grid cells are occupied', () => {
       const fullSnake: Position[] = [];
       for (let row = 0; row < BOARD_ROWS; row++) {
         for (let col = 0; col < BOARD_COLUMNS; col++) {

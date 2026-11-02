@@ -24,6 +24,10 @@ describe('GameBoard Component', () => {
     const canvas = screen.getByRole('img', { name: /snake game board/i });
     expect(canvas).toBeInTheDocument();
     expect(canvas).toHaveAttribute('data-testid', 'game-board-canvas');
+    expect(canvas).toHaveAttribute('aria-label', 'Snake game board, 300 by 300 pixels');
+    expect(canvas).toHaveAttribute('width', '300');
+    expect(canvas).toHaveAttribute('height', '300');
+    expect(canvas).toHaveStyle({ width: '300px', height: '300px' });
   });
 
   it('calls drawBoard on mount and updates', () => {

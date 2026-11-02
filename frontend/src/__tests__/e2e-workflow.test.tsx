@@ -161,13 +161,13 @@ describe('E2E Application Workflow', () => {
     // 1. Start game at {30, 60} moving RIGHT, apple at {90, 60}
     fireEvent.click(startBtn);
 
-    // 2. Advance 4 ticks (600ms):
+    // 2. Advance 9 ticks (1350ms):
     // Tick 1: {60, 60}
     // Tick 2: {90, 60} (eats apple, score = 100, length = 2)
-    // Tick 3: {120, 60} (unless respawned apple was at {120, 60}, in which case score = 200)
-    // Tick 4: {150, 60} -> Right wall collision!
+    // Ticks 3-8: advances across arena towards right wall
+    // Tick 9: {300, 60} -> Right wall collision!
     act(() => {
-      jest.advanceTimersByTime(600);
+      jest.advanceTimersByTime(1350);
     });
 
     // 3. Verify Game Over overlay is visible and reason is WALL
@@ -178,9 +178,9 @@ describe('E2E Application Workflow', () => {
     expect(Number(lockedScore)).toBeGreaterThanOrEqual(100);
     expect(overlay).toHaveTextContent(`Final Score: ${lockedScore}`);
 
-    // 4. Verify snake remained frozen in bounds (head at x = 120)
+    // 4. Verify snake remained frozen in bounds (head at x = 270)
     const lastSnakeRendered = drawSnakeSpy.mock.calls[drawSnakeSpy.mock.calls.length - 1][1];
-    expect(lastSnakeRendered[0]).toEqual({ x: 120, y: 60 });
+    expect(lastSnakeRendered[0]).toEqual({ x: 270, y: 60 });
 
     // 5. Click Reset -> overlay disappears, score resets to 0, Start button re-enabled
     fireEvent.click(resetBtn);
@@ -247,7 +247,7 @@ describe('E2E Application Workflow', () => {
     // 2. Start game, eat initial apple (+100), and hit right wall
     fireEvent.click(screen.getByTestId('start-button'));
     act(() => {
-      jest.advanceTimersByTime(600);
+      jest.advanceTimersByTime(1350);
     });
 
     // 3. ScoreSubmissionModal appears automatically for qualifying score

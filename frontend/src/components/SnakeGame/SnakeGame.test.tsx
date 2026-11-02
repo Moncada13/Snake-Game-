@@ -21,6 +21,7 @@ describe('SnakeGame Root Component Integration', () => {
       .spyOn(boardRenderer, 'drawSnake')
       .mockImplementation(() => {});
     jest.spyOn(scoreService, 'getTopScores').mockResolvedValue([]);
+    jest.spyOn(appleSpawner, 'spawnApple').mockReturnValue({ x: 0, y: 0 });
   });
 
   afterEach(() => {
@@ -212,10 +213,10 @@ describe('SnakeGame Root Component Integration', () => {
 
       render(<SnakeGame />);
 
-      // Start game, eat initial apple at (90,60) in 2 ticks (+100 points), then continue right into wall at x=150 in 2 more ticks (total 4 ticks = 600ms)
+      // Start game, eat initial apple at (90,60) in 2 ticks (+100 points), then continue right into wall at x=300 in 7 more ticks (total 9 ticks = 1350ms)
       fireEvent.click(screen.getByTestId('start-button'));
       act(() => {
-        jest.advanceTimersByTime(600);
+        jest.advanceTimersByTime(1350);
       });
 
       expect(screen.getByTestId('score-value')).toHaveTextContent('100');
@@ -273,7 +274,7 @@ describe('SnakeGame Root Component Integration', () => {
 
       fireEvent.click(screen.getByTestId('start-button'));
       act(() => {
-        jest.advanceTimersByTime(600);
+        jest.advanceTimersByTime(1350);
       });
 
       const input = screen.getByTestId('player-name-input');
@@ -391,7 +392,7 @@ describe('SnakeGame Root Component Integration', () => {
       // Game 1 -> Game Over -> Submit -> Reset before submit resolves
       fireEvent.click(screen.getByTestId('start-button'));
       act(() => {
-        jest.advanceTimersByTime(600);
+        jest.advanceTimersByTime(1350);
       });
       fireEvent.change(screen.getByTestId('player-name-input'), {
         target: { value: 'StaleWinner' },
@@ -417,7 +418,7 @@ describe('SnakeGame Root Component Integration', () => {
       // Game 2 -> Game Over -> Modal still opens because stale Game 1 submit was ignored!
       fireEvent.click(screen.getByTestId('start-button'));
       act(() => {
-        jest.advanceTimersByTime(600);
+        jest.advanceTimersByTime(1350);
       });
       expect(screen.getByTestId('score-submission-modal')).toBeInTheDocument();
 
