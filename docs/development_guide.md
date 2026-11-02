@@ -167,9 +167,26 @@ Candidate keypresses are validated against `direction` rather than `nextDirectio
 
 ---
 
+## 🏆 Leaderboard Frontend Integration Architecture (US-07)
+
+### 1. API Client (`frontend/src/services/scoreService.ts`)
+- `getApiBaseUrl()`: Reads `process.env.REACT_APP_API_URL` (defaulting to `http://localhost:3010`) and strips trailing slashes.
+- `getTopScores()`: Calls `GET /api/scores` and returns up to 5 ranked `ScoreItem` entries (`{ id, rank, playerName, score, createdAt }`).
+- `submitScore(playerName, score)`: Calls `POST /api/scores` and returns `{ saved, rank, entry, message, leaderboard }`.
+
+### 2. Eligibility & Input Validation (`frontend/src/game/leaderboardUtils.ts`)
+- `isScoreEligibleForTopFive(score, leaderboard)`: Returns `true` when `score >= 100`, `score % 100 === 0`, and either `leaderboard.length < 5` or `score > leaderboard[4].score` (strictly greater on ties so earlier holders keep their rank).
+- `validatePlayerName(rawName)`: Trims whitespace and enforces `1..30` characters before submitting to the backend.
+
+### 3. UI Components (`LeaderboardPanel` & `ScoreSubmissionModal`)
+- **`LeaderboardPanel` (`frontend/src/components/LeaderboardPanel/LeaderboardPanel.tsx`)**: Always renders 5 ranked slots (`#1` through `#5`) with `-` placeholders for empty slots, displays a non-blocking `Unable to load leaderboard` message when the backend is unreachable, and highlights newly created scores via `data-highlighted="true"`.
+- **`ScoreSubmissionModal` (`frontend/src/components/ScoreSubmissionModal/ScoreSubmissionModal.tsx`)**: Automatically opens with auto-focused player name input when `status === 'GAME_OVER'` and `isScoreEligibleForTopFive` is `true`, prevents duplicate submissions while in flight (`isSubmitting`), and displays inline validation or network error messages.
+
+---
+
 ## 🧪 Testing Verification Checklist
 
 Before archiving any OpenSpec change:
-1. `npm --prefix frontend run typecheck` passes with zero errors.
-2. `npm --prefix frontend run test:coverage` achieves ≥ 90% coverage.
+1. `npm --prefix frontend run typecheck` and `npm --prefix backend run typecheck` pass with zero errors.
+2. `npm --prefix frontend run test:coverage` and `npm --prefix backend run test:coverage` achieve ≥ 90% coverage across all metrics.
 3. Verification reports are generated in `openspec/changes/<change-name>/reports/`.

@@ -1,11 +1,20 @@
 import React from 'react';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { render, screen, act, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from '../App';
 import { BOARD_WIDTH, BOARD_HEIGHT } from '../game/constants';
 import * as boardRenderer from '../game/boardRenderer';
+import { scoreService } from '../services/scoreService';
 
 describe('E2E Application Workflow', () => {
+  beforeEach(() => {
+    jest.spyOn(scoreService, 'getTopScores').mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('executes full interactive user flow: page load -> verify elements -> start game -> reset game', async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -182,5 +191,89 @@ describe('E2E Application Workflow', () => {
     jest.clearAllTimers();
     jest.useRealTimers();
     drawSnakeSpy.mockRestore();
+  });
+
+  it('executes Top 5 Leaderboard E2E cycle (US-07): Load Top 5 -> Play & Score -> Game Over Modal -> Submit Name -> Highlight New Entry', async () => {
+    jest.useFakeTimers();
+    jest.spyOn(scoreService, 'getTopScores').mockResolvedValue([
+      {
+        id: 'seed-1',
+        rank: 1,
+        playerName: 'Alice',
+        score: 500,
+        createdAt: '2026-11-01T12:00:00.000Z',
+      },
+    ]);
+    const submitScoreSpy = jest
+      .spyOn(scoreService, 'submitScore')
+      .mockImplementation(async (playerName, finalScore) => ({
+        saved: true,
+        rank: 2,
+        entry: {
+          id: 'new-e2e-entry',
+          rank: 2,
+          playerName,
+          score: finalScore,
+          createdAt: '2026-11-01T12:05:00.000Z',
+        },
+        leaderboard: [
+          {
+            id: 'seed-1',
+            rank: 1,
+            playerName: 'Alice',
+            score: 500,
+            createdAt: '2026-11-01T12:00:00.000Z',
+          },
+          {
+            id: 'new-e2e-entry',
+            rank: 2,
+            playerName,
+            score: finalScore,
+            createdAt: '2026-11-01T12:05:00.000Z',
+          },
+        ],
+      }));
+
+    render(<App />);
+
+    // 1. Flush initial Top 5 load promise
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.getByTestId('leaderboard-row-1')).toHaveTextContent('Alice');
+    expect(screen.getByTestId('leaderboard-row-1')).toHaveTextContent('500');
+    expect(screen.getByTestId('leaderboard-row-2')).toHaveTextContent('-');
+
+    // 2. Start game, eat initial apple (+100), and hit right wall
+    fireEvent.click(screen.getByTestId('start-button'));
+    act(() => {
+      jest.advanceTimersByTime(600);
+    });
+
+    // 3. ScoreSubmissionModal appears automatically for qualifying score
+    const modal = screen.getByTestId('score-submission-modal');
+    expect(modal).toBeInTheDocument();
+
+    // 4. Enter player name and submit
+    const input = screen.getByTestId('player-name-input');
+    fireEvent.change(input, { target: { value: 'Elena' } });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('submit-score-button'));
+      await Promise.resolve();
+    });
+
+    // 5. Modal closes and Leaderboard row #2 updates with Elena and is highlighted
+    expect(
+      screen.queryByTestId('score-submission-modal')
+    ).not.toBeInTheDocument();
+    expect(submitScoreSpy).toHaveBeenCalledWith('Elena', expect.any(Number));
+    expect(screen.getByTestId('leaderboard-row-2')).toHaveTextContent('Elena');
+    expect(screen.getByTestId('leaderboard-row-2')).toHaveAttribute(
+      'data-highlighted',
+      'true'
+    );
+
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 });
