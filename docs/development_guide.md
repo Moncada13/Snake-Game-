@@ -61,19 +61,47 @@ The application will be accessible at `http://localhost:3000`.
 
 ---
 
-## 🗄️ Backend Setup (PostgreSQL Database)
+## 🗄️ Backend Setup (PostgreSQL Database & Top-5 Persistence - US-05)
 
-The backend and database configurations will be connected in `US-05` and `US-06`.
+The backend is located in the `backend/` directory and follows Domain-Driven Design (DDD) with TypeScript, Prisma, and PostgreSQL.
 
-### PostgreSQL Database (Docker)
+### 1. PostgreSQL Database (Docker)
 
 ```bash
-# Start PostgreSQL container
+# Start PostgreSQL 16 container
 docker-compose up -d
 
 # Verify container status
 docker-compose ps
 ```
+
+### 2. Backend Installation & Prisma Commands
+
+```bash
+# Install backend dependencies
+npm --prefix backend install
+
+# Generate Prisma Client
+npx --prefix backend prisma generate
+
+# Apply database migrations (when PostgreSQL is running on localhost:5432)
+npx --prefix backend prisma migrate deploy
+```
+
+### 3. Backend Type Checking & Tests
+
+```bash
+# Validate TypeScript types
+npm --prefix backend run typecheck
+
+# Run unit and transactional integration tests with coverage (≥ 90% required)
+npm --prefix backend run test:coverage
+```
+
+### 4. Atomic Top-5 Repository (`backend/src/infrastructure/repositories/PrismaScoreRepository.ts`)
+- `Score` (`backend/src/domain/models/Score.ts`): Validates `playerName` (`1..30` trimmed characters) and `score` (`>= 100`, integer multiple of `100`), throwing `DomainValidationError` on invalid input.
+- `PrismaScoreRepository.saveIfTopFive(playerName, score)`: Executes inside a `Serializable` interactive transaction (`Prisma.TransactionIsolationLevel.Serializable`), ordering scores by `[{ score: 'desc' }, { createdAt: 'asc' }, { id: 'asc' }]`, inserting qualifying scores, and deleting any overflow records beyond rank 5 in the same transaction.
+- `InMemoryPrismaClient` (`backend/src/infrastructure/prismaClient.ts`): Provides a deterministic transactional PostgreSQL-compatible adapter when `USE_IN_MEMORY_DB=true` or in environments without a running local PostgreSQL daemon.
 
 ---
 

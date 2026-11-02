@@ -1,0 +1,19 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Score {
+  id         String   @id @default(uuid()) @db.Uuid
+  playerName String   @map("player_name") @db.VarChar(30)
+  score      Int
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([score(sort: Desc), createdAt(sort: Asc), id(sort: Asc)], map: "idx_scores_leaderboard")
+  @@map("scores")
+}
+
