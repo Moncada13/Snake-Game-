@@ -1,4 +1,5 @@
 import {
+  APPLE_COLOR,
   BOARD_BACKGROUND_COLOR,
   BOARD_BORDER_COLOR,
   BOARD_COLUMNS,
@@ -9,7 +10,7 @@ import {
   GRID_LINE_COLOR,
   SNAKE_COLOR,
 } from './constants';
-import { drawBoard, drawCell, drawSnake } from './boardRenderer';
+import { drawApple, drawBoard, drawCell, drawSnake } from './boardRenderer';
 import { Position } from './types';
 
 describe('boardRenderer', () => {
@@ -108,6 +109,23 @@ describe('boardRenderer', () => {
     it('safely handles null context or empty snake array', () => {
       expect(() => drawSnake(null as unknown as CanvasRenderingContext2D, [])).not.toThrow();
       expect(() => drawSnake(mockCtx as CanvasRenderingContext2D, [])).not.toThrow();
+      expect(fillRectSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('drawApple', () => {
+    it('draws a 30px x 30px red square at the apple coordinates', () => {
+      const apple: Position = { x: 90, y: 60 };
+
+      drawApple(mockCtx as CanvasRenderingContext2D, apple);
+
+      expect(mockCtx.fillStyle).toBe(APPLE_COLOR);
+      expect(fillRectSpy).toHaveBeenCalledWith(90, 60, CELL_SIZE, CELL_SIZE);
+    });
+
+    it('is a no-op when apple or context is null', () => {
+      drawApple(mockCtx as CanvasRenderingContext2D, null);
+      drawApple(null as unknown as CanvasRenderingContext2D, { x: 90, y: 60 });
       expect(fillRectSpy).not.toHaveBeenCalled();
     });
   });

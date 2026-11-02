@@ -30,16 +30,35 @@ export const getNextHeadPosition = (head: Position, direction: Direction): Posit
 };
 
 /**
- * Advances the snake forward in the specified direction.
- * Prepends the new head and pops the tail to keep length constant.
+ * Checks whether the given head coordinate matches the active apple coordinate.
  */
-export const advanceSnake = (snake: Position[], direction: Direction): Position[] => {
+export const isEatingApple = (head: Position, apple: Position | null): boolean => {
+  if (!apple) {
+    return false;
+  }
+  return head.x === apple.x && head.y === apple.y;
+};
+
+/**
+ * Advances the snake forward in the specified direction.
+ * When grow is true, retains the tail segment so the snake grows by 1 segment.
+ * When grow is false (default), pops the tail to keep length constant.
+ */
+export const advanceSnake = (
+  snake: Position[],
+  direction: Direction,
+  grow: boolean = false
+): Position[] => {
   if (snake.length === 0) {
     return [INITIAL_SNAKE_POSITION];
   }
 
   const currentHead = snake[0];
   const newHead = getNextHeadPosition(currentHead, direction);
+
+  if (grow) {
+    return [newHead, ...snake];
+  }
 
   // Prepend new head and keep length constant by dropping tail
   return [newHead, ...snake.slice(0, -1)];

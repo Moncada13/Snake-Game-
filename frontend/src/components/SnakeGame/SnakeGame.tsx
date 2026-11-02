@@ -52,6 +52,7 @@ export const SnakeGame: React.FC = () => {
             status={state.status}
             score={state.score}
             snake={state.snake}
+            apple={state.apple}
           />
         </div>
         <div className="snake-game-sidebar">

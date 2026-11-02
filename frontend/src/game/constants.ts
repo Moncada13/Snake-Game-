@@ -14,4 +14,5 @@ export const BOARD_BORDER_COLOR = '#f9fafb';
 export const TICK_INTERVAL_MS = 150;
 export const INITIAL_SNAKE_POSITION = Object.freeze({ x: 30, y: 60 });
 export const INITIAL_DIRECTION = 'RIGHT';
+export const POINTS_PER_APPLE = 100;
 

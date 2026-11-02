@@ -13,6 +13,7 @@ export interface GameState {
   snake: Position[];
   direction: Direction;
   nextDirection: Direction;
+  apple: Position | null;
 }
 
 export type GameAction =

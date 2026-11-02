@@ -1,4 +1,5 @@
 import {
+  APPLE_COLOR,
   BOARD_BACKGROUND_COLOR,
   BOARD_BORDER_COLOR,
   BOARD_COLUMNS,
@@ -74,5 +75,17 @@ export function drawSnake(
   for (let i = 0; i < snake.length; i++) {
     drawCell(ctx, snake[i], SNAKE_COLOR);
   }
+}
+
+/**
+ * Draws the 30px x 30px apple using the APPLE_COLOR (#ef4444).
+ */
+export function drawApple(
+  ctx: CanvasRenderingContext2D,
+  apple: Position | null
+): void {
+  if (!ctx || !apple) return;
+
+  drawCell(ctx, apple, APPLE_COLOR);
 }
 

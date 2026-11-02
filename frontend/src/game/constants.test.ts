@@ -10,6 +10,7 @@ import {
   GRID_LINE_COLOR,
   INITIAL_DIRECTION,
   INITIAL_SNAKE_POSITION,
+  POINTS_PER_APPLE,
   SNAKE_COLOR,
   TICK_INTERVAL_MS,
 } from './constants';
@@ -31,10 +32,11 @@ describe('Game Constants', () => {
     expect(BOARD_BORDER_COLOR).toBe('#f9fafb');
   });
 
-  it('defines loop and initial snake constants', () => {
+  it('defines loop, initial snake, and scoring constants', () => {
     expect(TICK_INTERVAL_MS).toBe(150);
     expect(INITIAL_SNAKE_POSITION).toEqual({ x: 30, y: 60 });
     expect(INITIAL_DIRECTION).toBe('RIGHT');
+    expect(POINTS_PER_APPLE).toBe(100);
   });
 });
 

@@ -1,4 +1,9 @@
-import { advanceSnake, getNextHeadPosition, isOppositeDirection } from './snakeEngine';
+import {
+  advanceSnake,
+  getNextHeadPosition,
+  isEatingApple,
+  isOppositeDirection,
+} from './snakeEngine';
 import { Direction, Position } from './types';
 
 describe('snakeEngine', () => {
@@ -76,6 +81,32 @@ describe('snakeEngine', () => {
     it('returns default fallback when given an empty snake array', () => {
       const nextSnake = advanceSnake([], 'RIGHT');
       expect(nextSnake).toEqual([{ x: 30, y: 60 }]);
+    });
+
+    it('retains tail segment and grows snake length by 1 when grow is true', () => {
+      const snake: Position[] = [{ x: 30, y: 60 }];
+      const grownSnake = advanceSnake(snake, 'RIGHT', true);
+
+      expect(grownSnake).toEqual([
+        { x: 60, y: 60 },
+        { x: 30, y: 60 },
+      ]);
+      expect(grownSnake).toHaveLength(2);
+    });
+  });
+
+  describe('isEatingApple', () => {
+    it('returns true when head coordinates match apple coordinates', () => {
+      expect(isEatingApple({ x: 60, y: 60 }, { x: 60, y: 60 })).toBe(true);
+    });
+
+    it('returns false when head coordinates do not match apple coordinates', () => {
+      expect(isEatingApple({ x: 30, y: 60 }, { x: 60, y: 60 })).toBe(false);
+      expect(isEatingApple({ x: 60, y: 30 }, { x: 60, y: 60 })).toBe(false);
+    });
+
+    it('returns false when apple is null', () => {
+      expect(isEatingApple({ x: 60, y: 60 }, null)).toBe(false);
     });
   });
 });

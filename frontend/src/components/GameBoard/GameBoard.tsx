@@ -1,19 +1,21 @@
 import React, { useEffect, useRef } from 'react';
 import { GameStatus, Position } from '../../game/types';
 import { BOARD_WIDTH, BOARD_HEIGHT } from '../../game/constants';
-import { drawBoard, drawSnake } from '../../game/boardRenderer';
+import { drawApple, drawBoard, drawSnake } from '../../game/boardRenderer';
 import './GameBoard.css';
 
 interface GameBoardProps {
   status: GameStatus;
   score: number;
   snake?: Position[];
+  apple?: Position | null;
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({
   status,
   score,
   snake = [],
+  apple = null,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -29,8 +31,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     ctx.scale(dpr, dpr);
 
     drawBoard(ctx);
+    drawApple(ctx, apple);
     drawSnake(ctx, snake);
-  }, [status, snake]);
+  }, [status, snake, apple]);
 
   return (
     <div

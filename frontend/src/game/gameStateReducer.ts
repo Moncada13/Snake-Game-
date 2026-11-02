@@ -1,6 +1,18 @@
-import { INITIAL_DIRECTION, INITIAL_SNAKE_POSITION } from './constants';
-import { advanceSnake, isOppositeDirection } from './snakeEngine';
+import { spawnApple } from './appleSpawner';
+import {
+  INITIAL_DIRECTION,
+  INITIAL_SNAKE_POSITION,
+  POINTS_PER_APPLE,
+} from './constants';
+import {
+  advanceSnake,
+  getNextHeadPosition,
+  isEatingApple,
+  isOppositeDirection,
+} from './snakeEngine';
 import { Direction, GameAction, GameState } from './types';
+
+export const INITIAL_APPLE_POSITION = Object.freeze({ x: 90, y: 60 });
 
 export const INITIAL_GAME_STATE: GameState = {
   status: 'IDLE',
@@ -8,11 +20,13 @@ export const INITIAL_GAME_STATE: GameState = {
   snake: [INITIAL_SNAKE_POSITION],
   direction: INITIAL_DIRECTION as Direction,
   nextDirection: INITIAL_DIRECTION as Direction,
+  apple: INITIAL_APPLE_POSITION,
 };
 
 export function gameStateReducer(
   state: GameState = INITIAL_GAME_STATE,
-  action: GameAction
+  action: GameAction,
+  rng: () => number = Math.random
 ): GameState {
   switch (action.type) {
     case 'START': {
@@ -20,13 +34,17 @@ export function gameStateReducer(
         return {
           ...state,
           status: 'RUNNING',
+          apple: state.apple ?? spawnApple(state.snake, rng),
         };
       }
       return state;
     }
 
     case 'RESET': {
-      return INITIAL_GAME_STATE;
+      return {
+        ...INITIAL_GAME_STATE,
+        apple: spawnApple([INITIAL_SNAKE_POSITION], rng),
+      };
     }
 
     case 'GAME_OVER': {
@@ -44,7 +62,26 @@ export function gameStateReducer(
         return state;
       }
       const activeDirection = state.nextDirection;
-      const nextSnake = advanceSnake(state.snake, activeDirection);
+      const nextHead = getNextHeadPosition(state.snake[0], activeDirection);
+      const ateApple = isEatingApple(nextHead, state.apple);
+      const nextSnake = advanceSnake(state.snake, activeDirection, ateApple);
+
+      if (ateApple) {
+        const nextScore = state.score + POINTS_PER_APPLE;
+        const nextApple = spawnApple(nextSnake, rng);
+        const nextStatus = nextApple === null ? 'GAME_OVER' : state.status;
+
+        return {
+          ...state,
+          status: nextStatus,
+          score: nextScore,
+          snake: nextSnake,
+          direction: activeDirection,
+          nextDirection: activeDirection,
+          apple: nextApple,
+        };
+      }
+
       return {
         ...state,
         snake: nextSnake,

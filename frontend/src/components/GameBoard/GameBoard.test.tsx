@@ -6,10 +6,12 @@ import * as boardRenderer from '../../game/boardRenderer';
 describe('GameBoard Component', () => {
   let drawBoardSpy: jest.SpyInstance;
   let drawSnakeSpy: jest.SpyInstance;
+  let drawAppleSpy: jest.SpyInstance;
 
   beforeEach(() => {
     drawBoardSpy = jest.spyOn(boardRenderer, 'drawBoard').mockImplementation(() => {});
     drawSnakeSpy = jest.spyOn(boardRenderer, 'drawSnake').mockImplementation(() => {});
+    drawAppleSpy = jest.spyOn(boardRenderer, 'drawApple').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -29,10 +31,12 @@ describe('GameBoard Component', () => {
     expect(drawBoardSpy).toHaveBeenCalled();
   });
 
-  it('calls drawSnake with provided snake segments', () => {
+  it('calls drawSnake and drawApple with provided snake and apple coordinates', () => {
     const snake = [{ x: 30, y: 60 }];
-    render(<GameBoard status="RUNNING" score={0} snake={snake} />);
+    const apple = { x: 90, y: 60 };
+    render(<GameBoard status="RUNNING" score={0} snake={snake} apple={apple} />);
     expect(drawSnakeSpy).toHaveBeenCalledWith(expect.anything(), snake);
+    expect(drawAppleSpy).toHaveBeenCalledWith(expect.anything(), apple);
   });
 
   it('handles HiDPI scaling when devicePixelRatio is set to 2 and when falsy', () => {

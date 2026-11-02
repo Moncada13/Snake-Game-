@@ -95,5 +95,48 @@ describe('E2E Application Workflow', () => {
     jest.useRealTimers();
     drawSnakeSpy.mockRestore();
   });
+
+  it('executes apple consumption E2E cycle: Start -> Eat apple -> Score +100 -> Grow snake to 2 segments -> Respawn apple', () => {
+    jest.useFakeTimers();
+    const drawSnakeSpy = jest.spyOn(boardRenderer, 'drawSnake');
+    const drawAppleSpy = jest.spyOn(boardRenderer, 'drawApple');
+
+    render(<App />);
+
+    const startBtn = screen.getByTestId('start-button');
+    const scoreVal = screen.getByTestId('score-value');
+
+    expect(scoreVal).toHaveTextContent('0');
+    expect(drawAppleSpy).toHaveBeenCalledWith(expect.anything(), { x: 90, y: 60 });
+
+    // Start game
+    fireEvent.click(startBtn);
+
+    // Advance 2 ticks (300ms): {30,60} -> {60,60} -> {90,60} (consumes apple at {90,60})
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    // Verify score increased by 100
+    expect(scoreVal).toHaveTextContent('100');
+
+    // Verify snake grew to 2 segments
+    const grownSnake = [
+      { x: 90, y: 60 },
+      { x: 60, y: 60 },
+    ];
+    expect(drawSnakeSpy).toHaveBeenCalledWith(expect.anything(), grownSnake);
+
+    // Verify newly respawned apple is non-null and does not overlap any segment of the grown snake
+    const lastDrawAppleCall = drawAppleSpy.mock.calls[drawAppleSpy.mock.calls.length - 1];
+    const respawnedApple = lastDrawAppleCall[1];
+    expect(respawnedApple).not.toBeNull();
+    expect(grownSnake).not.toContainEqual(respawnedApple);
+
+    jest.clearAllTimers();
+    jest.useRealTimers();
+    drawSnakeSpy.mockRestore();
+    drawAppleSpy.mockRestore();
+  });
 });
 

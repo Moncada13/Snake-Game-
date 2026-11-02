@@ -90,4 +90,23 @@ describe('SnakeGame Root Component Integration', () => {
     // Moved down from {30, 60} to {30, 90}
     expect(drawSnakeSpy).toHaveBeenCalledWith(expect.anything(), [{ x: 30, y: 90 }]);
   });
+
+  it('increments score by 100 and elongates snake when eating an apple', () => {
+    render(<SnakeGame />);
+
+    const startBtn = screen.getByTestId('start-button');
+    fireEvent.click(startBtn);
+
+    // Initial snake at {30, 60}, initial apple at {90, 60}, moving RIGHT
+    // Advance 2 ticks (300ms): tick 1 -> {60, 60}, tick 2 -> {90, 60} (eats apple!)
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    expect(screen.getByTestId('score-value')).toHaveTextContent('100');
+    expect(drawSnakeSpy).toHaveBeenCalledWith(expect.anything(), [
+      { x: 90, y: 60 },
+      { x: 60, y: 60 },
+    ]);
+  });
 });

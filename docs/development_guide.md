@@ -98,6 +98,21 @@ Candidate keypresses are validated against `direction` rather than `nextDirectio
 
 ---
 
+## 🍎 Food Generation, Scoring & Growth Architecture (US-03)
+
+### 1. Deterministic Free-Cell Apple Spawner (`frontend/src/game/appleSpawner.ts`)
+- `getAvailableCells(snake)`: Enumerates all 25 cells on the 5×5 grid (`150px × 150px`, `30px` cell size) in a single $O(25)$ pass and filters out any coordinate occupied by the snake's head or body.
+- `spawnApple(snake, rng = Math.random)`: Selects a random unoccupied coordinate from `getAvailableCells(snake)` (clamping index bounds to `[0, available.length - 1]`), or returns `null` if all 25 cells are occupied by the snake (preventing infinite loops).
+- Initial mount (`INITIAL_GAME_STATE`) places the first apple deterministically at `INITIAL_APPLE_POSITION = { x: 90, y: 60 }`, while `RESET` and post-consumption ticks spawn a fresh random unoccupied apple via `spawnApple`.
+
+### 2. Consumption, Tail-Retention Growth & Scoring
+- `isEatingApple(head, apple)` (`frontend/src/game/snakeEngine.ts`): Checks whether the next head coordinate coincides with the active apple coordinate.
+- `advanceSnake(snake, direction, grow)`: When `grow === true`, prepends the new head position while retaining all existing segments (`+1` segment / `+30px` length). When `grow === false`, drops the last tail segment to preserve length.
+- `POINTS_PER_APPLE = 100` (`frontend/src/game/constants.ts`): Each apple consumed increments `score` by `100` points and immediately spawns a new apple on a free cell (or transitions `status` to `'GAME_OVER'` if the snake reaches 25 segments and fills the entire board).
+- `drawApple(ctx, apple)` (`frontend/src/game/boardRenderer.ts`): Renders the apple on the Canvas at `(apple.x, apple.y)` with dimensions `30px × 30px` in red (`#ef4444`).
+
+---
+
 ## 🧪 Testing Verification Checklist
 
 Before archiving any OpenSpec change:
