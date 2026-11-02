@@ -1,3 +1,38 @@
+# 🐍 Snake Game (Full-Stack with PostgreSQL & Docker)
+
+Classic Snake game built with React, TypeScript, Node.js/Express, Prisma ORM, and PostgreSQL. Features a 300px × 300px game arena, responsive arrow key steering, collision detection, and a persistent Top-5 Leaderboard.
+
+## 🐳 Quick Start with Docker
+
+You can run the entire application (PostgreSQL database, Backend API, and Frontend web server) with Docker Compose:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Moncada13/Snake-Game-.git
+cd Snake-Game-
+
+# 2. Build and run all services in the background
+docker compose up --build -d
+```
+
+Once started, open your browser:
+- **Web App**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:3010/api/scores](http://localhost:3010/api/scores)
+
+Useful commands:
+```bash
+# View service status
+docker compose ps
+
+# Follow container logs
+docker compose logs -f
+
+# Stop all services
+docker compose down
+```
+
+---
+
 # Specboot: Augmented Spec-driven development
 
 ![Specboot](https://drive.google.com/uc?export=view&id=1yic8hwSzSyQE6Zmf6__YNBcBvqiHMGEr)

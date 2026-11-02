@@ -14,6 +14,20 @@ Ensure the following tools are installed:
 
 ---
 
+## 🐳 Quick Start with Docker (Recommended)
+
+To run the entire multi-container environment (PostgreSQL 16, Express Backend, and Nginx SPA Frontend):
+
+```bash
+docker compose up --build -d
+```
+
+- **Frontend**: `http://localhost:3000`
+- **Backend API**: `http://localhost:3010/api/scores`
+- **PostgreSQL**: `localhost:5432`
+
+---
+
 ## 📦 Frontend Setup & Commands
 
 The web frontend is located in the `frontend/` directory.
