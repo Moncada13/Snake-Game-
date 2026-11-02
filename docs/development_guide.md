@@ -103,6 +103,17 @@ npm --prefix backend run test:coverage
 - `PrismaScoreRepository.saveIfTopFive(playerName, score)`: Executes inside a `Serializable` interactive transaction (`Prisma.TransactionIsolationLevel.Serializable`), ordering scores by `[{ score: 'desc' }, { createdAt: 'asc' }, { id: 'asc' }]`, inserting qualifying scores, and deleting any overflow records beyond rank 5 in the same transaction.
 - `InMemoryPrismaClient` (`backend/src/infrastructure/prismaClient.ts`): Provides a deterministic transactional PostgreSQL-compatible adapter when `USE_IN_MEMORY_DB=true` or in environments without a running local PostgreSQL daemon.
 
+### 5. Leaderboard REST API (`GET /api/scores` & `POST /api/scores` - US-06)
+- **Start the API Server**:
+  ```bash
+  npm --prefix backend run build
+  npm --prefix backend start
+  ```
+  By default, the server listens on `http://localhost:3010` (configurable via `PORT`). Set `USE_IN_MEMORY_DB=true` when running without an external PostgreSQL daemon.
+- **Endpoints**:
+  - `GET /api/scores` → `200 OK` `{ "data": ScoreItemDTO[] }` (up to 5 ranked entries).
+  - `POST /api/scores` with `{ "playerName": "Elena", "score": 700 }` → `201 Created` (`saved: true`) when the score qualifies for Top 5, `200 OK` (`saved: false`, `message: "Score does not qualify for Top 5"`) when valid but not in Top 5, or `400 Bad Request` (`ValidationError`) on invalid input.
+
 ---
 
 ## 🐍 Game Engine & Controls Architecture (US-02)
